@@ -1,4 +1,5 @@
-
+#' Get tables from HTML content
+#'
 #' @importFrom dplyr arrange
 #' @importFrom dplyr desc
 #' @importFrom rvest html_nodes
@@ -6,12 +7,13 @@
 #' @importFrom rvest html_text
 #' @importFrom tibble tibble
 #' @importFrom xml2 read_html
-
+#' @keywords internal
+#' @export
 get_tables <- function(html_content){
   # get tables from the page source
   tables <- try(
     html_content %>%
-      html_nodes('table'), 
+      html_nodes('table'),
     silent = TRUE)
   table_out <- NA
   if(!'try-error' %in% class(tables)){
@@ -21,8 +23,8 @@ get_tables <- function(html_content){
       tbl_list  <- lapply(vv, function(v) v[[1]])
       capt_vec  <- sapply(vv, function(v) ifelse(length(v) == 2, ifelse(length(v[[2]]) > 0, v[[2]], 'no-caption'), 'uncoercible'))
       tbl_size  <- sapply(vv, function(v) ifelse('data.frame' %in% class(v), prod(dim(v[[1]])), 0))
-      tbl_tbl   <- 
-        tibble(table = tbl_list, caption = capt_vec, table_size = tbl_size) %>% 
+      tbl_tbl   <-
+        tibble(table = tbl_list, caption = capt_vec, table_size = tbl_size) %>%
         arrange(desc(table_size))
       table_out <- tbl_tbl$table
       names(table_out) <- tbl_tbl$caption
@@ -32,12 +34,12 @@ get_tables <- function(html_content){
 }
 
 table_to_tibble <- function(v){
-  table_tibble <- 
+  table_tibble <-
     try(suppressWarnings(suppressMessages(html_table(v))), silent = TRUE)
-  table_caption <- 
+  table_caption <-
     try(v %>%
           html_nodes('caption') %>%
-          html_text(), 
+          html_text(),
         silent = TRUE)
   if('try-error' %in% class(table_tibble)){
     return(as.character(v))

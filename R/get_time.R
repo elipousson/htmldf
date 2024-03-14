@@ -1,18 +1,20 @@
+#' Get publication or last updated dates from page
+#'
 #' @importFrom rvest html_nodes
 #' @importFrom rvest html_attr
 #' @importFrom stats na.omit
-
-# extract publication or last updated dates from page
+#' @keywords internal
+#' @export
 get_time <- function(page, url){
   if('xml_document' %in% class(page)){
     # try last commit date tag if it's a github page
     pub_time <- try(
-      c(page %>% 
+      c(page %>%
         html_nodes('div[class="d-flex flex-auto flex-justify-end ml-3 flex-items-baseline"]') %>%
         html_nodes('a') %>%
         html_nodes('relative-time') %>%
-        html_attr('datetime'), 
-        page %>% 
+        html_attr('datetime'),
+        page %>%
           html_nodes('time') %>%
           html_attr('datetime')
       ),
@@ -23,10 +25,10 @@ get_time <- function(page, url){
     if(length(pub_time) == 0){
       # check first if there are any times in the page header
       time_tags <- c(
-        'meta[property="article:published_time"]', 
+        'meta[property="article:published_time"]',
         'meta[property="og:updated_time"]',
-        'meta[property="article:published"]', 
-        'meta[property="article:created"]', 
+        'meta[property="article:published"]',
+        'meta[property="article:created"]',
         'meta[itemprop="datePublished"]',
         'meta[name="citation_online_date"]'
       )
@@ -38,11 +40,11 @@ get_time <- function(page, url){
         "h2[class='date-header']",
         "span[class='date-container minor-meta meta-color']",
         "span[class='postdate']",
-        "time", 
+        "time",
         "p[class='dateline']",
         "div[class='date']",
-        "i[class='fa fa-calendar-o']", 
-        "span[class='post-meta']", 
+        "i[class='fa fa-calendar-o']",
+        "span[class='post-meta']",
         "p",
         "h4"
       )
@@ -53,7 +55,7 @@ get_time <- function(page, url){
     if(length(pub_time) > 0){
       pub_time <- unique(pub_time)
       pub_time <- unlist(strsplit(pub_time, '\n'))
-      date_patterns <- c("d m y", "d B Y", "m/d/y", "Y/m/d", 'd b Y HM', 
+      date_patterns <- c("d m y", "d B Y", "m/d/y", "Y/m/d", 'd b Y HM',
                          'b d', 'Y-m-dH:M:S', "ymdTz", "ymdT", "Y-m-d")
       pub_time <- suppressWarnings(try(parse_date_time(pub_time, orders = date_patterns), silent = TRUE))
       if("try-error" %in% class(pub_time)) pub_time <- NA
@@ -69,25 +71,26 @@ get_time <- function(page, url){
   return(pub_time)
 }
 
+#' @keywords internal
 get_tags  <- function(tag, page){
   tag_chr <- try(
-    page %>% 
-      html_nodes(tag) %>% 
-      html_attr('content'), 
+    page %>%
+      html_nodes(tag) %>%
+      html_attr('content'),
     silent = TRUE
   )
   tag_chr <- ifelse('try-error' %in% class(tag_chr) | is.na(tag_chr), NA, tag_chr)
   return(tag_chr)
 }
 
+#' @keywords internal
 get_time_text <- function(tag, page){
   tag_chr <- try(
-    page %>% 
-      html_nodes(tag) %>% 
-      html_text(), 
+    page %>%
+      html_nodes(tag) %>%
+      html_text(),
     silent = TRUE
   )
   tag_chr <- ifelse('try-error' %in% class(tag_chr) | is.na(tag_chr), NA, tag_chr)
   return(tag_chr)
 }
-  

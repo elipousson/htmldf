@@ -1,3 +1,5 @@
+#' Get RSS links from HTML content
+#'
 #' @importFrom dplyr bind_rows
 #' @importFrom rvest html_nodes
 #' @importFrom rvest html_attr
@@ -5,19 +7,20 @@
 #' @importFrom xml2 url_absolute
 #' @importFrom xml2 xml_url
 #' @importFrom xml2 read_html
-
+#' @keywords internal
+#' @export
 get_rss_links <- function(html_content, url){
   # get rss feeds
-  links_rss <- html_content %>% 
-    html_nodes('link[type="application/rss+xml"]') %>% 
+  links_rss <- html_content %>%
+    html_nodes('link[type="application/rss+xml"]') %>%
     html_attr('href')
   # atom feeds
-  links_atom <- html_content %>% 
-    html_nodes('link[type="application/atom+xml"]') %>% 
+  links_atom <- html_content %>%
+    html_nodes('link[type="application/atom+xml"]') %>%
     html_attr('href')
   # feedburner links
   links_feedburner <- html_content %>%
-    html_nodes('a') %>% 
+    html_nodes('a') %>%
     html_attr('href') %>%
     grep('feeds\\.feedburner\\.com|\\/feed\\/', ., value = TRUE)
   # combine, get absolute
@@ -28,7 +31,7 @@ get_rss_links <- function(html_content, url){
   if(length(links) == 0){
     # index.xml
     links <- html_content %>%
-      html_nodes('a') %>% 
+      html_nodes('a') %>%
       html_attr('href') %>%
       grep('index\\.xml$|feed\\.rss$', ., value = TRUE) %>%
       xml2::url_absolute(base = url) %>%

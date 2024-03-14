@@ -1,14 +1,16 @@
+#' Get links from HTML content
+#'
 #' @importFrom rvest html_nodes
 #' @importFrom rvest html_attr
 #' @importFrom rvest html_text
 #' @importFrom tibble tibble
 #' @importFrom xml2 url_absolute
-
-
+#' @keywords internal
+#' @export
 get_links <- function(html_content, url){
   links_df <- try(get_page_links(html_content, url), silent = TRUE)
   if('try-error' %in% class(links_df)){
-    links_df  <- tibble(href = character(), 
+    links_df  <- tibble(href = character(),
                         text = character())
   }
   return(links_df)
